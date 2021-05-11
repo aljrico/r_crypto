@@ -1,0 +1,116 @@
+---
+title: "Encrypting with <b>R</b>"
+subtitle: "From protecting passwords to setting up a blockchain"
+author: "Alejandro J Rico"
+date: "27th of May, 2021"
+output:
+  xaringan::moon_reader:
+    css: 
+      - default
+      - css/mytheme.css
+      - css/mytheme-fonts.css
+    lib_dir: libs
+    seal: false
+    self_contained: false
+    nature:
+      highlightStyle: googlecode
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: 16:9
+      #ratio: 191:100
+      beforeInit: "macros.js"
+      slideNumberFormat: |
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: calc(%current% / %total% * 100%);">
+          </div>
+        </div>
+---
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE)
+library(knitr)
+library(tidyverse)
+library(icons)
+library(emo)
+xaringanExtra::use_panelset()
+```
+
+
+class: title-slide, right, top
+background-image: url(img/currencsies.jpg), url(img/security.jpg)
+background-position: 90% 75%, 75% 75%
+background-size: 8%, cover
+
+.right-column[
+<br>
+# `r rmarkdown::metadata$title`
+### `r rmarkdown::metadata$subtitle`
+
+**`r rmarkdown::metadata$author`**<br>
+`r rmarkdown::metadata$date`
+]
+
+---
+name: about-me
+layout: false
+class: about-me-slide, inverse, middle, center
+
+# About me
+
+  <img style="border-radius: 50%;" src="img/avatar.png" width="150px"/>
+
+  ## Alejandro J Rico
+
+  .fade[R Developer]
+  
+  <div style="text-align: center;">
+    <div style="display: inline-block; text-align: left;">
+      [`r shiny::icon("home")` aljrico.com](https://aljrico.com) <br>
+      [`r shiny::icon("twitter")` @aljrico](https://twitter.com/aljrico) <br>
+      [`r shiny::icon("github")` /aljrico](https://github.com/aljrico) <br>
+    </div>
+  </div>
+
+
+
+
+---
+
+name: outline
+layout: false
+class: top
+
+# Outline
+
+.pull-left-wide[
+`r shiny::icon("qrcode")` Digesting R objects <br> <br>
+`r shiny::icon("blender")` Hashing passwords <br> <br>
+`r shiny::icon("shield")` Protecting credentials <br> <br>
+`r shiny::icon("envelope-open-text")` End-to-end encryption <br> <br>
+`r shiny::icon("cubes")` What is a blockchain? <br> <br>
+`r shiny::icon("cube")` Creating your first blockchain <br> <br>
+]
+
+---
+
+
+name: encrypt_r_objects
+
+# `r shiny::icon("qrcode")` Digesting R objects
+
+.panelset[
+  .panel[.panel-name[Libraries]
+    **Step 1** Install any of the following libraries
+  ```{r, eval = FALSE, echo = TRUE}
+  install.packages('digest')
+  ```
+  ]
+  .panel[.panel-name[Hashing Algorithms]
+  ```{r, eval = TRUE, echo = TRUE}
+  r_object <- c(4, 8, 15, 16, 23, 42)
+  digest::digest(r_object)
+  digest::digest(r_object, algo = "sha256")
+  ```
+  ]
+
+]

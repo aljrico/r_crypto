@@ -1,0 +1,11 @@
+
+
+# Encrypted message -------------------------------------------------------
+key <- openssl::rand_bytes(32)
+msg <- digest::makeRaw('A very secret message')
+
+encrypted_message <- openssl::aes_cbc_encrypt(msg, key)
+rawToChar(encrypted_message)
+
+decrypted_message <- openssl::aes_cbc_decrypt(encrypted_message, key)
+rawToChar(decrypted_message)

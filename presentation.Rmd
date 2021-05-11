@@ -1,0 +1,42 @@
+---
+title: "Cryptography with R"
+subtitle: "From protecting passwords to your first blockchain"
+author: "Alejandro J Rico"
+date: "May 27, 2021"
+output:
+  ioslides_presentation: default
+---
+
+## Outline
+
+- Encrypting R objects
+- Hashing passwords
+- Protecting credentials
+
+## Getting up
+
+- Turn off alarm
+- Get out of bed
+
+## Breakfast
+
+- Eat eggs
+- Drink coffee
+
+# In the evening
+
+## Dinner
+
+- Eat spaghetti
+- Drink wine
+
+---
+
+```{r, cars, fig.cap="A scatterplot.", echo=FALSE}
+plot(cars)
+```
+
+## Going to sleep
+
+- Get in bed
+- Count sheep

@@ -16,7 +16,7 @@ output:
       highlightStyle: googlecode
       highlightLines: true
       countIncrementalSlides: false
-      ratio: 16:9
+      ratio: 16:10
       #ratio: 191:100
       beforeInit: "macros.js"
       slideNumberFormat: |
@@ -63,16 +63,11 @@ class: about-me-slide, inverse, middle, center
 
   .fade[R Developer]
   
-  <div style="text-align: center;">
-    <div style="display: inline-block; text-align: left;">
-      [`r shiny::icon("home")` aljrico.com](https://aljrico.com) <br>
-      [`r shiny::icon("twitter")` @aljrico](https://twitter.com/aljrico) <br>
-      [`r shiny::icon("github")` /aljrico](https://github.com/aljrico) <br>
-    </div>
-  </div>
-
-
-
+  .list[
+    [`r shiny::icon("home")` aljrico.com](https://aljrico.com) <br>
+    [`r shiny::icon("twitter")` @aljrico](https://twitter.com/aljrico) <br>
+    [`r shiny::icon("github")` /aljrico](https://github.com/aljrico) <br>
+  ]
 
 ---
 
@@ -84,8 +79,8 @@ class: top
 
 .pull-left-wide[
 `r shiny::icon("qrcode")` Digesting R objects <br> <br>
-`r shiny::icon("blender")` Hashing passwords <br> <br>
-`r shiny::icon("shield")` Protecting credentials <br> <br>
+`r shiny::icon("shield")` Protecting passwords <br> <br>
+`r shiny::icon("comments")` Message Authentication <br> <br>
 `r shiny::icon("envelope-open-text")` End-to-end encryption <br> <br>
 `r shiny::icon("cubes")` What is a blockchain? <br> <br>
 `r shiny::icon("cube")` Creating your first blockchain <br> <br>
@@ -100,17 +95,144 @@ name: encrypt_r_objects
 
 .panelset[
   .panel[.panel-name[Libraries]
-    **Step 1** Install any of the following libraries
+    Install these libraries
   ```{r, eval = FALSE, echo = TRUE}
   install.packages('digest')
+  install.packages('openssl')
   ```
   ]
   .panel[.panel-name[Hashing Algorithms]
   ```{r, eval = TRUE, echo = TRUE}
   r_object <- c(4, 8, 15, 16, 23, 42)
-  digest::digest(r_object)
+  ```
+  ```{r, eval = TRUE, echo = TRUE}
+  digest::digest(r_object, algo = "md5")
   digest::digest(r_object, algo = "sha256")
   ```
   ]
+  .panel[.panel-name[Digesting text]
+  Small changes lead to radically different hashes
+  ```{r, eval = TRUE, echo = TRUE}
+  text <-  "Not Penny's boat"
+  text2 <- "Not Penny's boat."
+  ```
+  ```{r, eval = TRUE, echo = TRUE}
+  digest::digest(text, algo = "sha256")
+  digest::digest(text2, algo = "sha256")
+  ```
+  ]
+]
 
+
+---
+
+
+name: protecting_passwords
+
+# `r shiny::icon("shield")` Protecting Passwords
+
+.panelset[
+  .panel[.panel-name[Saving passwords]
+  `r shiny::icon('exclamation-triangle')` You should _never_ save the passwords directly.
+  ```{r, eval = FALSE, echo = TRUE}
+  # Please don't do this
+  input$register_password %>% 
+    save_password()
+  ```
+  `r shiny::icon('lock')` Save the generated hash instead.
+  ```{r, eval = FALSE, echo = TRUE}
+  # Much better
+  input$register_password %>% 
+    digest::digest(algo = "sha256) %>% 
+    save_password()
+  ```
+  ]
+  .panel[.panel-name[Verifying credentials]
+  Digesting algorithms are deterministic &nbsp; `r shiny::icon('arrow-right')` &nbsp; Equal inputs will always yield the same hash
+  
+  ```{r, eval = FALSE, echo = TRUE}
+  verify_credentials <- function(input_username, input_password){
+    credentials <- read.csv('credentials.csv') 
+    digested_input_password <- digest::digest(input_password, algo = "sha256")
+    
+    user_credentials <- credentials %>% 
+      dplyr::filter(username == input_username) %>% 
+      dplyr::filter(hashed_password == digested_input_password)
+    
+    if(nrow(user_credentials) > 0) return(TRUE) else return(FALSE)
+  }
+  
+  ```
+  
+  We can then verify if the password a user introduces is the same they used to register. <br>
+  Even if we don't know the actual password!
+  ]
+  .panel[.panel-name[Salting]
+  `r shiny::icon('plus-square')` &nbsp; Salt is added to the hashing process to force their uniqueness
+  ```{r, eval = TRUE, echo = TRUE}
+  hash_password <- function(input_password, salt){
+    paste0(salt, input_password) %>% digest::digest(algo = "sha256")
+  }
+  ```
+  ```{r, eval = TRUE, echo = TRUE}
+  hash_password("password1234", salt = "bagel")
+  hash_password("password1234", salt = "challah")
+  ```
+  ]
+]
+
+---
+
+
+name: message_authentication
+
+# `r shiny::icon("comments")` Message Authentication
+
+.panelset[
+  .panel[.panel-name[MAC]
+  `r shiny::icon("user-secret")` Like a common password to enter a secret club. A **M**essage **A**uthentication **C**ode (MAC) is based on a shared secret between the sender and the receiver.
+  
+  ```{r, eval = FALSE, echo = TRUE}
+  httr::POST(
+    url = "http://hydra.island/access",
+    body = list(
+      message = "Destroy everything",
+      secret_code = "polar bear"
+    )
+  )
+  ```
+  How do I know it's you who's sending me this? Because you're the only other server who also knows this secret code.
+  ]
+  .panel[.panel-name[...]
+  `r shiny::icon("plane-departure")` Let's say you are a member of the secret service. You are alone on an airport, waiting for your next flight. As you are pretty bored, you open your laptop and look for something to do. You spot a connection called **FREE WIFI AIRPORT**. You log in.
+  
+  `r shiny::icon("lightbulb")` Now let's say you decide is a great idea to send some important messages to the headquarters. You're very professional, so you'll include the `secret_code` in the message. This way the server knows it's you who sends it. Bulletproof.
+  
+  `r shiny::icon("door-open")` The situation is now the following: Whoever runs that WiFi might have intercepted that message. It not only has the power to read _and modify_ the message you just sent. It has the `secret_code` to keep sending messages and pretending to be you in the future. And you might never even notice it.
+  ]
+  .panel[.panel-name[HMAC]
+  `r shiny::icon("plus-square")` A safer strategy would be to use our 'Salting' technique to generate the secret code
+  
+  ```{r, eval = FALSE, echo = TRUE}
+  message <- "Destroy everything"
+  hashed_secret_code <- hash_password(message, salt = "polar bear")
+  httr::POST(
+    url = "http://hydra.island/access",
+    body = list(
+      message = message,
+      secret_code = hashed_secret_code
+    )
+  )
+  ```
+  ]
+  .panel[.panel-name[...]
+  `r shiny::icon("thumbs-up")` Now if this is intercepted, only this message will be compromised. Since the `hashed_secret_code` will be different for each message we send.
+  
+  `r shiny::icon("shield")` Knowing the message and the `hashed_secret_code` does not get anyone closer to figuring out the `secret_code.
+  
+  `r shiny::icon("not-equal")` If a third party intercepts and modify the message, the server will know. Because the `hashed_secret_code` will not match.
+  ]
+  .panel[.panel-name[Proper HMAC]
+  While salting already accomplishes the purpose. There are some pre-
+  ]
 ]

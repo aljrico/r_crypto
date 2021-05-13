@@ -47,16 +47,11 @@ class: about-me-slide, inverse, middle, center
 
   .fade[R Developer]
   
-  &lt;div style="text-align: center;"&gt;
-    &lt;div style="display: inline-block; text-align: left;"&gt;
-      [<i class="fa fa-home" role="presentation" aria-label="home icon"></i> aljrico.com](https://aljrico.com) &lt;br&gt;
-      [<i class="fab fa-twitter" role="presentation" aria-label="twitter icon"></i> @aljrico](https://twitter.com/aljrico) &lt;br&gt;
-      [<i class="fab fa-github" role="presentation" aria-label="github icon"></i> /aljrico](https://github.com/aljrico) &lt;br&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-
-
-
+  .list[
+    [<i class="fa fa-home" role="presentation" aria-label="home icon"></i> aljrico.com](https://aljrico.com) &lt;br&gt;
+    [<i class="fab fa-twitter" role="presentation" aria-label="twitter icon"></i> @aljrico](https://twitter.com/aljrico) &lt;br&gt;
+    [<i class="fab fa-github" role="presentation" aria-label="github icon"></i> /aljrico](https://github.com/aljrico) &lt;br&gt;
+  ]
 
 ---
 
@@ -68,8 +63,8 @@ class: top
 
 .pull-left-wide[
 <i class="fa fa-qrcode" role="presentation" aria-label="qrcode icon"></i> Digesting R objects &lt;br&gt; &lt;br&gt;
-<i class="fa fa-blender" role="presentation" aria-label="blender icon"></i> Hashing passwords &lt;br&gt; &lt;br&gt;
-<i class="fa fa-shield" role="presentation" aria-label="shield icon"></i> Protecting credentials &lt;br&gt; &lt;br&gt;
+<i class="fa fa-shield" role="presentation" aria-label="shield icon"></i> Protecting passwords &lt;br&gt; &lt;br&gt;
+<i class="fa fa-comments" role="presentation" aria-label="comments icon"></i> Message Authentication &lt;br&gt; &lt;br&gt;
 <i class="fa fa-envelope-open-text" role="presentation" aria-label="envelope-open-text icon"></i> End-to-end encryption &lt;br&gt; &lt;br&gt;
 <i class="fa fa-cubes" role="presentation" aria-label="cubes icon"></i> What is a blockchain? &lt;br&gt; &lt;br&gt;
 <i class="fa fa-cube" role="presentation" aria-label="cube icon"></i> Creating your first blockchain &lt;br&gt; &lt;br&gt;
@@ -84,17 +79,21 @@ name: encrypt_r_objects
 
 .panelset[
   .panel[.panel-name[Libraries]
-    **Step 1** Install any of the following libraries
+    Install these libraries
   
   ```r
   install.packages('digest')
+  install.packages('openssl')
   ```
   ]
   .panel[.panel-name[Hashing Algorithms]
   
   ```r
   r_object &lt;- c(4, 8, 15, 16, 23, 42)
-  digest::digest(r_object)
+  ```
+  
+  ```r
+  digest::digest(r_object, algo = "md5")
   ```
   
   ```
@@ -109,7 +108,161 @@ name: encrypt_r_objects
   ## [1] "0c91b468b07e8701fb0c342398b509e9ad3ee7f468b08449592540d6f7ee0b80"
   ```
   ]
+  .panel[.panel-name[Digesting text]
+  Small changes lead to radically different hashes
+  
+  ```r
+  text &lt;-  "Not Penny's boat"
+  text2 &lt;- "Not Penny's boat."
+  ```
+  
+  ```r
+  digest::digest(text, algo = "sha256")
+  ```
+  
+  ```
+  ## [1] "58b529f7756d833c7f9354b3c824a967cc102b93b85fa9c377fd22beb870e620"
+  ```
+  
+  ```r
+  digest::digest(text2, algo = "sha256")
+  ```
+  
+  ```
+  ## [1] "d832eb961c2e2696084dbdd6fa17e9c1e74703fe7a0a63c11a272470bcd8e4a8"
+  ```
+  ]
+]
 
+
+---
+
+
+name: protecting_passwords
+
+# <i class="fa fa-shield" role="presentation" aria-label="shield icon"></i> Protecting Passwords
+
+.panelset[
+  .panel[.panel-name[Saving passwords]
+  <i class="fa fa-exclamation-triangle" role="presentation" aria-label="exclamation-triangle icon"></i> You should _never_ save the passwords directly.
+  
+  ```r
+  # Please don't do this
+  input$register_password %&gt;% 
+    save_password()
+  ```
+  <i class="fa fa-lock" role="presentation" aria-label="lock icon"></i> Save the generated hash instead.
+  
+  ```r
+  # Much better
+  input$register_password %&gt;% 
+    digest::digest(algo = "sha256) %&gt;% 
+    save_password()
+  ```
+  ]
+  .panel[.panel-name[Verifying credentials]
+  Digesting algorithms are deterministic &amp;nbsp; <i class="fa fa-arrow-right" role="presentation" aria-label="arrow-right icon"></i> &amp;nbsp; Equal inputs will always yield the same hash
+  
+  
+  ```r
+  verify_credentials &lt;- function(input_username, input_password){
+    credentials &lt;- read.csv('credentials.csv') 
+    digested_input_password &lt;- digest::digest(input_password, algo = "sha256")
+    
+    user_credentials &lt;- credentials %&gt;% 
+      dplyr::filter(username == input_username) %&gt;% 
+      dplyr::filter(hashed_password == digested_input_password)
+    
+    if(nrow(user_credentials) &gt; 0) return(TRUE) else return(FALSE)
+  }
+  ```
+  
+  We can then verify if the password a user introduces is the same they used to register. &lt;br&gt;
+  Even if we don't know the actual password!
+  ]
+  .panel[.panel-name[Salting]
+  <i class="fa fa-plus-square" role="presentation" aria-label="plus-square icon"></i> &amp;nbsp; Salt is added to the hashing process to force their uniqueness
+  
+  ```r
+  hash_password &lt;- function(input_password, salt){
+    paste0(salt, input_password) %&gt;% digest::digest(algo = "sha256")
+  }
+  ```
+  
+  ```r
+  hash_password("password1234", salt = "bagel")
+  ```
+  
+  ```
+  ## [1] "7cf0997df40c7a5f8aeb3de319712acb93657534e4cd4c70424249ad5934aa71"
+  ```
+  
+  ```r
+  hash_password("password1234", salt = "challah")
+  ```
+  
+  ```
+  ## [1] "e4472c6495f006b9281a226b1af7ca0eca0f8c51efe7b8e61238fe1e5fb00520"
+  ```
+  ]
+]
+
+---
+
+
+name: message_authentication
+
+# <i class="fa fa-comments" role="presentation" aria-label="comments icon"></i> Message Authentication
+
+.panelset[
+  .panel[.panel-name[MAC]
+  <i class="fa fa-user-secret" role="presentation" aria-label="user-secret icon"></i> Like a common password to enter a secret club. A **M**essage **A**uthentication **C**ode (MAC) is based on a shared secret between the sender and the receiver.
+  
+  
+  ```r
+  httr::POST(
+    url = "http://hydra.island/access",
+    body = list(
+      message = "Destroy everything",
+      secret_code = "polar bear"
+    )
+  )
+  ```
+  How do I know it's you who's sending me this? Because you're the only other server who also knows this secret code.
+  ]
+  .panel[.panel-name[...]
+  <i class="fa fa-plane-departure" role="presentation" aria-label="plane-departure icon"></i> Let's say you are a member of the secret service. You are alone on an airport, waiting for your next flight. As you are pretty bored, you open your laptop and look for something to do. You spot a connection called **FREE WIFI AIRPORT**. You log in.
+  
+  <i class="fa fa-lightbulb" role="presentation" aria-label="lightbulb icon"></i> Now let's say you decide is a great idea to send some important messages to the headquarters. You're very professional, so you'll include the `secret_code` in the message. This way the server knows it's you who sends it. Bulletproof.
+  
+  <i class="fa fa-door-open" role="presentation" aria-label="door-open icon"></i> The situation is now the following: Whoever runs that WiFi might have intercepted that message. It not only has the power to read _and modify_ the message you just sent. It has the `secret_code` to keep sending messages and pretending to be you in the future. And you might never even notice it.
+  ]
+  .panel[.panel-name[HMAC]
+  <i class="fa fa-plus-square" role="presentation" aria-label="plus-square icon"></i> A safer strategy would be to use our 'Salting' technique to generate the secret code
+  
+  
+  ```r
+  message &lt;- "Destroy everything"
+  hashed_secret_code &lt;- hash_password(message, salt = "polar bear")
+  httr::POST(
+    url = "http://hydra.island/access",
+    body = list(
+      message = message,
+      secret_code = hashed_secret_code
+    )
+  )
+  ```
+  ]
+  .panel[.panel-name[...]
+  <i class="fa fa-thumbs-up" role="presentation" aria-label="thumbs-up icon"></i> Now if this is intercepted, only this message will be compromised. Since the `hashed_secret_code` will be different for each message we send.
+  
+  <i class="fa fa-shield" role="presentation" aria-label="shield icon"></i> Knowing the message and the `hashed_secret_code` does not get anyone closer to figuring out the `secret_code.
+  
+  <i class="fa fa-not-equal" role="presentation" aria-label="not-equal icon"></i> If a third party intercepts and modify the message, the server will know. Because the `hashed_secret_code` will not match.
+  ]
+  .panel[.panel-name[Proper HMAC]
+  
+  ]
 ]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
@@ -119,7 +272,7 @@ name: encrypt_r_objects
 "highlightStyle": "googlecode",
 "highlightLines": true,
 "countIncrementalSlides": false,
-"ratio": "16:9",
+"ratio": "16:10",
 "slideNumberFormat": "<div class=\"progress-bar-container\">\n  <div class=\"progress-bar\" style=\"width: calc(%current% / %total% * 100%);\">\n  </div>\n</div>"
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {

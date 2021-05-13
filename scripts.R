@@ -1,4 +1,7 @@
 
+# hmac --------------------------------------------------------------------
+digest::hmac(key = "polar bear", object = "Not Penny's boat.", algo = "sha256")
+openssl::sha256(x = "Not Penny's boat.", key = "polar bear")
 
 # Encrypted message -------------------------------------------------------
 key <- openssl::rand_bytes(32)

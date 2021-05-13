@@ -29,6 +29,10 @@
 --my-pink:           #c09090;
 }
 
+p {
+    font-size: 0.9em;
+}
+
 /*-- LINKS/ANCHORS --*/
 a {
   color:              var(--my-coral);
@@ -160,7 +164,7 @@ div.footer-link {
   color:              var(--my-blue);
   background:         var(--PaleGrey);
   border-radius:      3px;
-  padding:            1px 1px 1px 1px;
+  /* padding:            0em; */
 }
 
 /*-- Line highlighting within code --*/
@@ -184,7 +188,7 @@ pre {
 /*--  --*/
 pre code {
   background:         none;
-  font-size:          18px !important;
+  font-size:          14px !important;
 }
 
 /* -- CUSTOM CLASSES ---------------------------------------------------------*/
@@ -340,6 +344,11 @@ pre code {
   width: 75%;
   float: right;
   padding-top: 1em;
+}
+
+.list {
+    display:inline-block;
+    text-align: left;
 }
 
 /* Lets us expand the code chunk horizontally upon hovering! */

@@ -210,7 +210,7 @@ name: message_authentication
   
   `r shiny::icon("door-open")` The situation is now the following: Whoever runs that WiFi might have intercepted that message. It not only has the power to read _and modify_ the message you just sent. It has the `secret_code` to keep sending messages and pretending to be you in the future. And you might never even notice it.
   ]
-  .panel[.panel-name[HMAC]
+  .panel[.panel-name['Salted' MAC]
   `r shiny::icon("plus-square")` A safer strategy would be to use our 'Salting' technique to generate the secret code
   
   ```{r, eval = FALSE, echo = TRUE}
@@ -226,13 +226,31 @@ name: message_authentication
   ```
   ]
   .panel[.panel-name[...]
-  `r shiny::icon("thumbs-up")` Now if this is intercepted, only this message will be compromised. Since the `hashed_secret_code` will be different for each message we send.
+  `r shiny::icon("thumbs-up")` Now if this is intercepted, only this message will be compromised. Since the `hashed_secret_code` will be different for each message we send. 
   
   `r shiny::icon("shield")` Knowing the message and the `hashed_secret_code` does not get anyone closer to figuring out the `secret_code.
   
   `r shiny::icon("not-equal")` If a third party intercepts and modify the message, the server will know. Because the `hashed_secret_code` will not match.
   ]
-  .panel[.panel-name[Proper HMAC]
-  While salting already accomplishes the purpose. There are some pre-
+  .panel[.panel-name[HMAC]
+  While salting already accomplishes what we wanted. There are still some vulnerabilities that could be exploited through what is called [length extension attack](https://en.wikipedia.org/wiki/Length_extension_attack). There are well-established functions that concatenate the 'salt' in a more convoluted manner, protecting it from those attacks.
+  
+  ```{r, eval = FALSE, echo = TRUE}
+  digest::hmac(object = c(4, 8, 15, 16, 23, 42), key = "polar bear", algo = "sha256")
+  ```
+  - A HMAC uses a secret key, where as a 'salt' can be public. Though conceptually they're the same.
+  - "Salting" simply concatenates a 'salt' before hashing. The HMAC process adds the key in a more complicated way.
+  - Adding a `HMAC` is the current standard protocol to authenticate messages.
   ]
+]
+
+---
+
+
+name: message_encryption
+
+# `r shiny::icon("envelope-open-text")` End-to-end encryption
+
+.panelset[
+  .panel[.panel-name[Re]]
 ]

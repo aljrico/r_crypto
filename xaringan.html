@@ -272,6 +272,24 @@ name: message_authentication
   - Adding a `HMAC` is the current standard protocol to authenticate messages.
   ]
 ]
+
+---
+
+
+name: message_encryption
+
+# <i class="fa fa-envelope-open-text" role="presentation" aria-label="envelope-open-text icon"></i> End-to-end encryption
+
+.panelset[
+  .panel[.panel-name[Reversible algorithms]
+  <i class="fa fa-blender" role="presentation" aria-label="blender icon"></i> So far, the algorithms we've used completely destroy all information. They are designed so it's impossible to recover the original message, based on the hash they produce. There's no backtrack method. It's non reversible.
+  
+  <i class="fa fa-box" role="presentation" aria-label="box icon"></i> Other algorithms don't completely destroy the information. They just hide it. These algorithms have methods both to encrypt and decrypt messages. So information is not lost.
+  
+  .center-col[&lt;img src="img/encryption.png" style="max-width: 60%;"/&gt;]
+  
+  ]
+]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

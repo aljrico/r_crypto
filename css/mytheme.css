@@ -271,11 +271,8 @@ pre code {
 }
 
 .center-col {
-  width: 29%;
-  text-align: left;
-  padding-left: 20px;
-  padding-right: 20px;
-  float: left;
+    display:inline-block;
+    text-align:center;
 }
 
 .right-col {

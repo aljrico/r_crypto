@@ -4,8 +4,8 @@ digest::hmac(key = "polar bear", object = "Not Penny's boat.", algo = "sha256")
 openssl::sha256(x = "Not Penny's boat.", key = "polar bear")
 
 # Encrypted message -------------------------------------------------------
-key <- openssl::rand_bytes(32)
-msg <- digest::makeRaw('A very secret message')
+key <- openssl::sha256(charToRaw("Our shared secret"))
+msg <- digest::makeRaw("A very secret message")
 
 encrypted_message <- openssl::aes_cbc_encrypt(msg, key)
 rawToChar(encrypted_message)

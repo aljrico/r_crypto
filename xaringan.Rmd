@@ -252,5 +252,12 @@ name: message_encryption
 # `r shiny::icon("envelope-open-text")` End-to-end encryption
 
 .panelset[
-  .panel[.panel-name[Re]]
+  .panel[.panel-name[Reversible algorithms]
+  `r shiny::icon("blender")` So far, the algorithms we've used completely destroy all information. They are designed so it's impossible to recover the original message, based on the hash they produce. There's no backtrack method. It's non reversible.
+  
+  `r shiny::icon("box")` Other algorithms don't completely destroy the information. They just hide it. These algorithms have methods both to encrypt and decrypt messages. So information is not lost.
+  
+  .center-col[<img src="img/encryption.png" style="max-width: 60%;"/>]
+  
+  ]
 ]

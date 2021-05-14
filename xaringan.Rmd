@@ -257,7 +257,24 @@ name: message_encryption
   
   `r shiny::icon("box")` Other algorithms don't completely destroy the information. They just hide it. These algorithms have methods both to encrypt and decrypt messages. So information is not lost.
   
-  .center-col[<img src="img/encryption.png" style="max-width: 60%;"/>]
+  <br>
   
+  .center[<img src="img/reversible-encryption.png" style="max-width: 40%;"/>]
+  
+  ]
+  .panel[.panel-name[Centralised encryption]
+  `r shiny::icon("key")` We can encrypt messages using a secret key. Thus, the message can only be decrypted with the key.
+  
+  ```{r, eval = TRUE, echo = TRUE}
+  key <- openssl::sha256(charToRaw("4815162342")); 
+  msg <- digest::makeRaw("Not Penny's boat!")
+
+  encrypted_message <- openssl::aes_cbc_encrypt(msg, key)
+  rawToChar(encrypted_message)
+  
+  decrypted_message <- openssl::aes_cbc_decrypt(encrypted_message, key)
+  rawToChar(decrypted_message)
+  
+  ```
   ]
 ]

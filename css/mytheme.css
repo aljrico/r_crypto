@@ -40,7 +40,8 @@ li {
 /*-- LINKS/ANCHORS --*/
 a {
   color:              var(--my-coral);
-  border-bottom:      3px solid var(--my-coral);
+  font-weight:        600;
+  border-bottom:      0px solid var(--my-coral);
   line-height:        2rem;
 }
 

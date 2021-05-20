@@ -62,12 +62,11 @@ class: top
 # Outline
 
 .pull-left-wide[
-<i class="fa fa-qrcode" role="presentation" aria-label="qrcode icon"></i> Digesting R objects &lt;br&gt; &lt;br&gt;
-<i class="fa fa-shield" role="presentation" aria-label="shield icon"></i> Protecting passwords &lt;br&gt; &lt;br&gt;
-<i class="fa fa-comments" role="presentation" aria-label="comments icon"></i> Message Authentication &lt;br&gt; &lt;br&gt;
-<i class="fa fa-envelope-open-text" role="presentation" aria-label="envelope-open-text icon"></i> End-to-end encryption &lt;br&gt; &lt;br&gt;
-<i class="fa fa-cubes" role="presentation" aria-label="cubes icon"></i> What is a blockchain? &lt;br&gt; &lt;br&gt;
-<i class="fa fa-cube" role="presentation" aria-label="cube icon"></i> Creating your first blockchain &lt;br&gt; &lt;br&gt;
+#####<i class="fa fa-qrcode" role="presentation" aria-label="qrcode icon"></i> Digesting R objects
+#####<i class="fa fa-shield" role="presentation" aria-label="shield icon"></i> Protecting passwords
+#####<i class="fa fa-comments" role="presentation" aria-label="comments icon"></i> Message Authentication
+#####<i class="fa fa-envelope-open-text" role="presentation" aria-label="envelope-open-text icon"></i> End-to-end encryption
+#####<i class="fa fa-cubes" role="presentation" aria-label="cubes icon"></i> Creating your first blockchain
 ]
 
 ---
@@ -223,7 +222,7 @@ name: message_authentication
   httr::POST(
     url = "http://hydra.island/access",
     body = list(
-      message = "Destroy everything",
+      message = "Execute order 66",
       secret_code = "polar bear"
     )
   )
@@ -242,7 +241,7 @@ name: message_authentication
   
   
   ```r
-  message &lt;- "Destroy everything"
+  message &lt;- "Execute order 66"
   hashed_secret_code &lt;- hash_password(message, salt = "polar bear")
   httr::POST(
     url = "http://hydra.island/access",
@@ -271,6 +270,22 @@ name: message_authentication
   - "Salting" simply concatenates a 'salt' before hashing. The HMAC process adds the key in a more complicated way.
   - Adding a `HMAC` is the current standard protocol to authenticate messages.
   ]
+  .panel[.panel-name[...]
+    
+  <i class="fa fa-warning" role="presentation" aria-label="warning icon"></i> With the current configuration, a malicious 3rd party could not forge new messages. But it definitely could duplicate existing ones, if they manage to intercept them.
+  
+  <i class="fa fa-fingerprint" role="presentation" aria-label="fingerprint icon"></i> To prevent the forge of duplicates, it's recommended to add a unique identifier for every message sent. We then can create a `HMAC` from the entire message
+  
+  
+  ```r
+  message &lt;- list(action = "Execture order 66", id = runif(max = 10^6, n = 1))
+  
+  message$hmac &lt;- message %&gt;% 
+    jsonlite::toJSON() %&gt;% 
+    as.character() %&gt;% 
+    digest::hmac(key = "polar bear", algo = "sha256")
+  ```
+  ]
 ]
 
 ---
@@ -281,34 +296,88 @@ name: message_encryption
 # <i class="fa fa-envelope-open-text" role="presentation" aria-label="envelope-open-text icon"></i> End-to-end encryption
 
 .panelset[
-  .panel[.panel-name[Reversible algorithms]
+  .panel[.panel-name[...]
   <i class="fa fa-blender" role="presentation" aria-label="blender icon"></i> So far, the algorithms we've used completely destroy all information. They are designed so it's impossible to recover the original message, based on the hash they produce. There's no backtrack method. It's non reversible.
   
-  <i class="fa fa-box" role="presentation" aria-label="box icon"></i> Other algorithms don't completely destroy the information. They just hide it. These algorithms have methods both to encrypt and decrypt messages. So information is not lost.
+  <i class="fa fa-box" role="presentation" aria-label="box icon"></i> Other algorithms don't completely destroy the information. They just hide it. These algorithms have methods both to encrypt and decrypt messages.
   
   &lt;br&gt;
   
   .center[&lt;img src="img/reversible-encryption.png" style="max-width: 40%;"/&gt;]
   
-  ]
-  .panel[.panel-name[Centralised encryption]
-  <i class="fa fa-key" role="presentation" aria-label="key icon"></i> We can encrypt messages using a secret key. Thus, the message can only be decrypted with the key.
+  .center[**Encryption** is reversible, **digestion** is not]
+  
+]
+  .panel[.panel-name[Naive encryption]
+  <i class="fa fa-universal-access" role="presentation" aria-label="universal-access icon"></i> The simplest way we could do something like this is to encode our message
+
+  
+  ```r
+  encoded_message &lt;- RCurl::base64Encode("Not Penny's boat!") %&gt;% as.character()
+  encoded_message
+  ```
+  
+  ```
+  ## [1] "Tm90IFBlbm55J3MgYm9hdCE="
+  ```
+  
+  ```r
+  decoded_message &lt;- RCurl::base64Decode(encoded_message)
+  decoded_message
+  ```
+  
+  ```
+  ## [1] "Not Penny's boat!"
+  ```
+  
+  But that's not very safe. Anyone can decode a message hidden like this.
+]
+.panel[.panel-name[Key-based encryption]
+  <i class="fa fa-key" role="presentation" aria-label="key icon"></i> We can cover information by protecting the encoding under a secret key. This way, the message can *only* be decrypted with the key.
   
   
   ```r
-  key &lt;- openssl::sha256(charToRaw("4815162342")); 
+  key &lt;- openssl::sha256(charToRaw("4815162342"))
   msg &lt;- digest::makeRaw("Not Penny's boat!")
   
   encrypted_message &lt;- openssl::aes_cbc_encrypt(msg, key)
-  rawToChar(encrypted_message)
+  rawToChar(encrypted_message[!encrypted_message=='00']) %&gt;% RCurl::base64Encode() %&gt;% as.character()
   ```
   
   ```
-  ## [1] "–nLFðÆS/’p©’(\2175R\b»ÜHƒÕPï8­ßë\215È1ñ"
+  ## [1] "+xnY/+8+XzvfbREQQG4wzZFH97NszXyif2yl/FW7qJg="
   ```
   
   ```r
-  decrypted_message &lt;- openssl::aes_cbc_decrypt(encrypted_message, key)
+  encrypted_message %&gt;% openssl::aes_cbc_decrypt(key) %&gt;% rawToChar()
+  ```
+  
+  ```
+  ## [1] "Not Penny's boat!"
+  ```
+  ]
+  
+.panel[.panel-name[Asymmetric cryptography]
+  <i class="fa fa-project-diagram" role="presentation" aria-label="project-diagram icon"></i> The previous approach, while technically safe in 1-to-1 communication, has the complication of relying on a single key to identify all users. If we had to create a somewhat complex network of communications, we'd need to create a new key for every possible interaction between users. Which is unfeasible, since it grows as `2^n`. 
+  
+  <i class="fa fa-key" role="presentation" aria-label="key icon"></i> A more scalable solution for this comes from the [RSA](https://w.wiki/tjT) protocol that involves a pair of keys. This protocol establishes that every user will have two keys, one that can be shared (public key) and another one that should be kept safe (secret key). A powerful application of this protocol, is the development of encryption algorithms that use the **public key** to encrypt a message, but it requires the **private key** to decrypt it. 
+  ]
+.panel[.panel-name[...]
+  
+  ```r
+  key &lt;- openssl::rsa_keygen()
+  msg &lt;- digest::makeRaw("Not Penny's boat!")
+  
+  encrypted_message &lt;- openssl::rsa_encrypt(msg, key$pubkey)
+  rawToChar(encrypted_message[!encrypted_message=='00']) %&gt;% RCurl::base64Encode() %&gt;% as.character()
+  ```
+  
+  ```
+  ## [1] "Plx7Pp+S+q+v2nn4NLM/J/neZiVoC7hZ6QSdjMzlps2uhdxEXiPM5xqokjnvi7ZGmm3RZkbqA9La3xgez6h5A1ufLXSXo825kXrq2ozsmVIzhp9jSTw8movjvrxpZ1Azy4zWPxFW6X0YenFLm038auKcHy5YLfpRpXfg6e6eP54ELw7LUBmc26ZD4DTNtFBq/qlXxPqXySmFRLbqKILQy9X4BZWgrsZz0tuA2QinYNjqv2xKHFshnss7vIixS5NU0jQbL2D3FanKMS9nR6KgEXwJmH0p+boa3QQaWZ5iVLDXwlRfgGXypEyArufnkW+plOb6yiqLGD1nU/JT/oNd9Q=="
+  ```
+  
+  ```r
+  decrypted_message &lt;- openssl::rsa_decrypt(encrypted_message, key)
   rawToChar(decrypted_message)
   ```
   
@@ -316,7 +385,61 @@ name: message_encryption
   ## [1] "Not Penny's boat!"
   ```
   ]
+.panel[.panel-name[...]
+  <i class="fa fa-exchange-alt" role="presentation" aria-label="exchange-alt icon"></i> When two users start communication, they exchange public keys. Then they use each other's public keys to encrypt the messages.
+  
+  <i class="fa fa-user-lock" role="presentation" aria-label="user-lock icon"></i> Let's say user *Alice* wants to send a message to user *Bob*. Alice will use Bob's public key to encrypt the message, and send it encrypted. That way, even if message is intercepted and Bob's public key is intercepted, the message will remain hidden. Since the only way to decrypt it is through Bob's secret key. 
+  
+  <i class="fa fa-hdd" role="presentation" aria-label="hdd icon"></i> So where are these 'secret' keys stored? Here's when the controversy kicks in. If you want to call it *end-to-end encryption*, then the secret key should only be stored in a user's client. That is the only way no third party (including the service provider) can read the messages.
+  ]
 ]
+
+
+---
+
+
+name: blockchain
+
+# <i class="fa fa-cubes" role="presentation" aria-label="cubes icon"></i> Creating your first blockchain 
+
+.panelset[
+  .panel[.panel-name[-]
+   &lt;blockquote&gt; 
+    A blockchain is a public database where new data are stored in a container called a block and are added to an immutable chain.    &lt;/blockquote&gt;
+  
+  &lt;hr&gt;
+  
+  <i class="fa fa-box-open" role="presentation" aria-label="box-open icon"></i> Anyone can add entries to this database
+  
+  <i class="fa fa-file-contract" role="presentation" aria-label="file-contract icon"></i> Every new entry is signed by its author
+  
+  <i class="fa fa-wrench" role="presentation" aria-label="wrench icon"></i> Every new entry needs a proof of work
+  
+  <i class="fa fa-hand-point-right" role="presentation" aria-label="hand-point-right icon"></i> We'll now showcase - step by step - a simplified implementation of the most common rules to define a blockchain.
+  ]
+  .panel[.panel-name[Blocks]
+  <i class="fa fa-cube" role="presentation" aria-label="cube icon"></i> Data is organised in small containers called blocks
+  
+  
+  ```r
+  block &lt;- list(
+    index = 1, 
+    timestamp = Sys.time(), 
+    message = "And now it begins"
+  )
+  ```
+  
+  <i class="fa fa-cubes" role="presentation" aria-label="cubes icon"></i> We can orderly stack this cubes in a `data.frame` structure
+  
+  ```
+  ##   index           timestamp                                 message
+  ## 1     1 2021-05-20 17:16:31                       And now it begins
+  ## 2     2 2021-05-20 17:16:31 Woe to the Usurper if we had been there
+  ## 3     3 2021-05-20 17:16:31                      Dance with me then
+  ```
+  ]
+]
+
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

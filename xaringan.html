@@ -155,7 +155,7 @@ name: protecting_passwords
   ```r
   # Much better
   input$register_password %&gt;% 
-    digest::digest(algo = "sha256) %&gt;% 
+    digest::digest(algo = "sha256") %&gt;% 
     save_password()
   ```
   ]
@@ -345,7 +345,7 @@ name: message_encryption
   ```
   
   ```
-  ## [1] "+xnY/+8+XzvfbREQQG4wzZFH97NszXyif2yl/FW7qJg="
+  ## [1] "oFhjG0YNMpCVxc6VRCFNeZ1kELysOwLGGL1b7Rwarho="
   ```
   
   ```r
@@ -357,12 +357,12 @@ name: message_encryption
   ```
   ]
   
-.panel[.panel-name[Asymmetric cryptography]
-  <i class="fa fa-project-diagram" role="presentation" aria-label="project-diagram icon"></i> The previous approach, while technically safe in 1-to-1 communication, has the complication of relying on a single key to identify all users. If we had to create a somewhat complex network of communications, we'd need to create a new key for every possible interaction between users. Which is unfeasible, since it grows as `2^n`. 
+.panel[.panel-name[...]
+  <i class="fa fa-project-diagram" role="presentation" aria-label="project-diagram icon"></i> The previous approach, while technically safe in 1-to-1 communication, has the complication of relying on a single key to identify all users. If we had to create a somewhat complex network of communications, we'd need to create a new key for every possible interaction between users. Which is unfeasible, since it grows as `factorial(1000)`. 
   
   <i class="fa fa-key" role="presentation" aria-label="key icon"></i> A more scalable solution for this comes from the [RSA](https://w.wiki/tjT) protocol that involves a pair of keys. This protocol establishes that every user will have two keys, one that can be shared (public key) and another one that should be kept safe (secret key). A powerful application of this protocol, is the development of encryption algorithms that use the **public key** to encrypt a message, but it requires the **private key** to decrypt it. 
   ]
-.panel[.panel-name[...]
+.panel[.panel-name[Asymmetric cryptography]
   
   ```r
   key &lt;- openssl::rsa_keygen()
@@ -373,7 +373,7 @@ name: message_encryption
   ```
   
   ```
-  ## [1] "Plx7Pp+S+q+v2nn4NLM/J/neZiVoC7hZ6QSdjMzlps2uhdxEXiPM5xqokjnvi7ZGmm3RZkbqA9La3xgez6h5A1ufLXSXo825kXrq2ozsmVIzhp9jSTw8movjvrxpZ1Azy4zWPxFW6X0YenFLm038auKcHy5YLfpRpXfg6e6eP54ELw7LUBmc26ZD4DTNtFBq/qlXxPqXySmFRLbqKILQy9X4BZWgrsZz0tuA2QinYNjqv2xKHFshnss7vIixS5NU0jQbL2D3FanKMS9nR6KgEXwJmH0p+boa3QQaWZ5iVLDXwlRfgGXypEyArufnkW+plOb6yiqLGD1nU/JT/oNd9Q=="
+  ## [1] "YZ/qoSMCGs5OOW8J3Jn2Ixdfahfu7p7fhF3X2a3M2pUXMA3ROtTc0cRMVxpUrv/iUntgKiwuJRt7KYxpZA+GUBz7SD/1fg+XxFa1s0Jad4i3+prSTq1mV5jlvZlz75jpR/kOj0r7Zkr0Ur51tteNP85hUngSJ22ke1p6XYFEirMu0WvftczRTqqGEp8LuUbHlwdc1iWNBdOikeM/Bv+xMVSOYyDmZCRPBqLe0oCId5LG0+HCdLhibqyyuKPOQ97Iz2BjvhGtOV6bD0TjiU6F/CFX2U1ucoMkdQeIsXl53RyZuSs1vxX51uILPS88fHYjKQQGPqWaCK2PScooY0F8fQ=="
   ```
   
   ```r
@@ -399,6 +399,7 @@ name: message_encryption
 
 
 name: blockchain
+class: wider
 
 # <i class="fa fa-cubes" role="presentation" aria-label="cubes icon"></i> Creating your first blockchain 
 
@@ -409,13 +410,14 @@ name: blockchain
   
   &lt;hr&gt;
   
+  #### Properties
   <i class="fa fa-box-open" role="presentation" aria-label="box-open icon"></i> Anyone can add entries to this database
   
   <i class="fa fa-file-contract" role="presentation" aria-label="file-contract icon"></i> Every new entry is signed by its author
   
-  <i class="fa fa-wrench" role="presentation" aria-label="wrench icon"></i> Every new entry needs a proof of work
+  <i class="fa fa-clipboard-check" role="presentation" aria-label="clipboard-check icon"></i> Every new entry needs to be verified
   
-  <i class="fa fa-hand-point-right" role="presentation" aria-label="hand-point-right icon"></i> We'll now showcase - step by step - a simplified implementation of the most common rules to define a blockchain.
+  <i class="fa fa-wrench" role="presentation" aria-label="wrench icon"></i> Every new entry needs a proof of work
   ]
   .panel[.panel-name[Blocks]
   <i class="fa fa-cube" role="presentation" aria-label="cube icon"></i> Data is organised in small containers called blocks
@@ -433,10 +435,43 @@ name: blockchain
   
   ```
   ##   index           timestamp                                 message
-  ## 1     1 2021-05-20 17:16:31                       And now it begins
-  ## 2     2 2021-05-20 17:16:31 Woe to the Usurper if we had been there
-  ## 3     3 2021-05-20 17:16:31                      Dance with me then
+  ## 1     1 2021-05-24 16:05:27                       And now it begins
+  ## 2     2 2021-05-24 16:05:27 Woe to the Usurper if we had been there
+  ## 3     3 2021-05-24 16:05:27                      Dance with me then
   ```
+
+  ]
+  .panel[.panel-name[Signature]
+  <i class="fa fa-file-contract" role="presentation" aria-label="file-contract icon"></i> Signatures are a protocol to verify block ownership
+  
+  By 'inverting' the logic of asymmetric encryption, we generate a hash using a **private key**, which can be verified using its **public key**
+  .pull-left-narrow[
+  
+  ```r
+  process_data &lt;- function(data){
+  data %&gt;% 
+    jsonlite::toJSON() %&gt;% 
+    as.character() %&gt;% 
+    digest::makeRaw()
+  }
+  ```
+  ]
+  
+  .pull-right-wide[
+  
+  ```r
+  create_signature &lt;- function(data, key){
+  msg &lt;- process_data(data)
+  openssl::signature_create(msg, hash = openssl::sha256, key = key) %&gt;% 
+    as.character() %&gt;% 
+    paste(collapse = ",") %&gt;% 
+    RCurl::base64Encode() %&gt;% 
+    as.character()
+  }
+  ```
+  ]
+  
+
   ]
 ]
 
@@ -445,8 +480,9 @@ name: blockchain
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script src="macros.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "googlecode",
+"highlightStyle": "none",
 "highlightLines": true,
+"highlightSpans": true,
 "countIncrementalSlides": false,
 "ratio": "16:10",
 "slideNumberFormat": "<div class=\"progress-bar-container\">\n  <div class=\"progress-bar\" style=\"width: calc(%current% / %total% * 100%);\">\n  </div>\n</div>"
